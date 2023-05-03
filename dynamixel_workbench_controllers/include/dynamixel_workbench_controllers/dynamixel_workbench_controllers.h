@@ -65,9 +65,9 @@ class DynamixelController
   // ROS Topic Subscriber
   ros::Subscriber cmd_vel_sub_;
   ros::Subscriber trajectory_sub_;
+  ros::Subscriber dynamixel_command_sub_;
 
   // ROS Service Server
-  ros::ServiceServer dynamixel_command_server_;
 
   // ROS Service Client
 
@@ -124,8 +124,7 @@ class DynamixelController
 
   void commandVelocityCallback(const geometry_msgs::Twist::ConstPtr &msg);
   void trajectoryMsgCallback(const trajectory_msgs::JointTrajectory::ConstPtr &msg);
-  bool dynamixelCommandMsgCallback(dynamixel_workbench_msgs::DynamixelCommand::Request &req,
-                                   dynamixel_workbench_msgs::DynamixelCommand::Response &res);
+  void dynamixelCommandMsgCallback(const dynamixel_workbench_msgs::DynamixelCommand::ConstPtr &msg);
 };
 
 #endif //DYNAMIXEL_WORKBENCH_CONTROLLERS_H

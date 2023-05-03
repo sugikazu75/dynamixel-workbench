@@ -327,11 +327,11 @@ void DynamixelController::initSubscriber()
 {
   trajectory_sub_ = priv_node_handle_.subscribe("joint_trajectory", 100, &DynamixelController::trajectoryMsgCallback, this);
   if (is_cmd_vel_topic_) cmd_vel_sub_ = priv_node_handle_.subscribe("cmd_vel", 10, &DynamixelController::commandVelocityCallback, this);
+  dynamixel_command_sub_ = priv_node_handle_.subscribe("dynamixel_command", 100, &DynamixelController::dynamixelCommandMsgCallback, this);
 }
 
 void DynamixelController::initServer()
 {
-  dynamixel_command_server_ = priv_node_handle_.advertiseService("dynamixel_command", &DynamixelController::dynamixelCommandMsgCallback, this);
 }
 
 void DynamixelController::readCallback(const ros::TimerEvent&)
@@ -740,15 +740,14 @@ void DynamixelController::trajectoryMsgCallback(const trajectory_msgs::JointTraj
   }
 }
 
-bool DynamixelController::dynamixelCommandMsgCallback(dynamixel_workbench_msgs::DynamixelCommand::Request &req,
-                                                      dynamixel_workbench_msgs::DynamixelCommand::Response &res)
+void DynamixelController::dynamixelCommandMsgCallback(const dynamixel_workbench_msgs::DynamixelCommand::ConstPtr &msg)
 {
   bool result = false;
   const char* log;
 
-  uint8_t id = req.id;
-  std::string item_name = req.addr_name;
-  int32_t value = req.value;
+  uint8_t id = msg->id;
+  std::string item_name = msg->addr_name;
+  int32_t value = msg->value;
 
   result = dxl_wb_->itemWrite(id, item_name.c_str(), value, &log);
   if (result == false)
@@ -756,10 +755,6 @@ bool DynamixelController::dynamixelCommandMsgCallback(dynamixel_workbench_msgs::
     ROS_ERROR("%s", log);
     ROS_ERROR("Failed to write value[%d] on items[%s] to Dynamixel[ID : %d]", value, item_name.c_str(), id);
   }
-
-  res.comm_result = result;
-
-  return true;
 }
 
 int main(int argc, char **argv)
